@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Point to the custom Dockerfile in the same directory
+    container_name: laravel-ticket-system-app
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    networks:
+      - app-network
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: laravel_ticket_system
+      DB_USERNAME: zimou
+      DB_PASSWORD: zimou123
+
+  webserver:
+    image: nginx:alpine
+    container_name: laravel-ticket-system-webserver
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - app-network
+
+  db:
+    image: mysql:8.0
+    container_name: laravel-ticket-system-db
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: zimou123
+      MYSQL_DATABASE: laravel_ticket_system
+      MYSQL_USER: zimou
+      MYSQL_PASSWORD: zimou123
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  dbdata:
